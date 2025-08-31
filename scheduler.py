@@ -65,3 +65,22 @@ class SolunaScheduler:
 
 # 创建调度器实例供主程序使用
 soluna_scheduler = SolunaScheduler()
+
+# 主程序入口
+if __name__ == "__main__":
+    try:
+        logger.info("启动Soluna调度器...")
+        soluna_scheduler.start()
+        
+        # 保持程序运行
+        import time
+        while True:
+            time.sleep(1)
+            
+    except KeyboardInterrupt:
+        logger.info("收到停止信号，正在关闭调度器...")
+        soluna_scheduler.shutdown()
+        logger.info("调度器已正常退出")
+    except Exception as e:
+        logger.error(f"调度器启动失败: {str(e)}")
+        raise
