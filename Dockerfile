@@ -37,9 +37,9 @@ RUN pip install --upgrade pip && \
 # 在COPY之前确保创建目录
 RUN mkdir -p /app
 
-# 复制启动脚本（先复制，避免被后续COPY覆盖）
-COPY docker-entrypoint.sh /app/
-RUN chmod +x /app/docker-entrypoint.sh
+# 复制启动脚本
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh && ls -la /app/docker-entrypoint.sh
 
 # 设置工作目录
 WORKDIR /app
