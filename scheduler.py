@@ -16,7 +16,7 @@ class SolunaScheduler:
         
     def start(self):
         """启动调度器"""
-        # 添加定时任务
+        # 添加每日生活轨迹生成任务
         self.scheduler.add_job(
             func=self.generate_daily_life_paths,
             trigger=CronTrigger.from_crontab(self.cron_expression),
@@ -25,9 +25,18 @@ class SolunaScheduler:
             replace_existing=True
         )
         
+        # 添加30分钟情绪更新任务
+        self.scheduler.add_job(
+            func=self.update_emotions_every_thirty_minutes,
+            trigger=CronTrigger.from_crontab('*/30 * * * *'),  # 每30分钟执行一次
+            id='thirty_minutes_emotion_update',
+            name='每30分钟更新所有角色情绪',
+            replace_existing=True
+        )
+        
         # 启动调度器
         self.scheduler.start()
-        logger.info(f"调度器已启动，定时任务配置: {self.cron_expression}")
+        logger.info(f"调度器已启动，定时任务配置: {self.cron_expression}, 30分钟情绪更新已启用")
         
     def shutdown(self):
         """关闭调度器"""
@@ -61,6 +70,24 @@ class SolunaScheduler:
             
         except Exception as e:
             logger.error(f"每日批量生成生活轨迹任务执行失败: {str(e)}")
+            # 这里可以添加告警通知逻辑，例如发送邮件、消息等
+            
+    def update_emotions_every_thirty_minutes(self):
+        """每30分钟更新所有角色情绪"""
+        try:
+            logger.info("开始执行30分钟情绪更新任务")
+            
+            # 调用API更新最近30分钟的情绪
+            result = soluna_api_client.update_emotions_from_recent_events()
+            
+            # 记录任务完成信息
+            if result:
+                updated_count = result.get('data', {}).get('updated_count', 0)
+                total_count = result.get('data', {}).get('total_count', 0)
+                logger.info(f"30分钟情绪更新任务完成，成功更新: {updated_count}个角色，总计: {total_count}个角色")
+            
+        except Exception as e:
+            logger.error(f"30分钟情绪更新任务执行失败: {str(e)}")
             # 这里可以添加告警通知逻辑，例如发送邮件、消息等
 
 # 创建调度器实例供主程序使用
